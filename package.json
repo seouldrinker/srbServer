@@ -1,0 +1,25 @@
+{
+  "name": "srbServer",
+  "version": "0.0.1",
+  "description": "SeolReaBal server for 2017 Seoul Public Data Competition",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --compilers js:babel-core/register",
+    "clean": "rm -rf build/**",
+    "build": "babel server --out-dir build",
+    "start": "npm run build && node ./build/index.js"
+  },
+  "author": "jicjjang <jicjjang12@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.16.2",
+    "express": "^4.15.4"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "chai": "^4.1.1",
+    "mocha": "^3.5.0"
+  }
+}
