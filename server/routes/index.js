@@ -4,6 +4,7 @@ const router = express.Router()
 
 router.use((req, res, next) => {
   // somthing to do. like, login check...
+  console.log('Requested path: %s', req.path)
   next()
 })
 
