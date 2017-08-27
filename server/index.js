@@ -10,11 +10,12 @@ import index from './routes/index'
 const app = express()
 const port = 3000
 
-// config - logs, cookie, cors, route
+// config - logs, cookie, cors, route, exception
 app.use(morgan('combined', {stream: fs.createWriteStream(path.join(__dirname + '/../logs', 'access.log'), {flags: 'a'})}))
 app.use(cookieParser())
 app.use(cors())
 app.use('/', index)
+
 app.use((err, req, res, next) => {
   res.status(err.status || 500)
   res.send({
