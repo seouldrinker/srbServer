@@ -7,10 +7,10 @@ const router = express.Router()
 // router.use(authentication)
 
 router.get('/', (req, res) => {
-  res.send(`/info${req.query.page ? `?page=${req.query.page}` : ''}`)
+  res.send(`/info`)
 })
 
 export default router
 
 // clear      : authentication             // 공통 middleware. 인증
-//            : /srb/vbeta/info?page=2     // 해당 사용자의 정보와 Feed(기본 20개를 줌) page로 다음 페이지
+//            : /srb/vbeta/info            // 해당 사용자의 정보들. 피드 히스토리는 따로 가져오기

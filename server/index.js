@@ -3,6 +3,7 @@ import morgan from 'morgan'
 import fs from 'fs'
 import path from 'path'
 import cookieParser from 'cookie-parser'
+import bodyParser from 'body-parser'
 import cors from 'cors'
 
 import index from './routes/index'
@@ -17,6 +18,8 @@ const port = 3000
 app.use(morgan('combined', {stream: fs.createWriteStream(path.join(__dirname + '/../logs', 'access.log'), {flags: 'a'})}))
 app.use(cookieParser())
 app.use(cors())
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 app.use('/srb/vbeta/explore', explore)
 app.use('/srb/vbeta/feeds', feeds)

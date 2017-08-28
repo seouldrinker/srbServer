@@ -21,7 +21,7 @@ export function authentication (req, res, next) {
       case 'kakaotalk':
         return _commonAuth(next,
           'https://kapi.kakao.com/v1/user/access_token_info',
-          req.query, true, {
+          req.query, false, {
           'Authorization': 'Bearer ' + req.query.token
         })
         break
@@ -33,18 +33,19 @@ export function authentication (req, res, next) {
 }
 
 function _commonAuth(next, url, query, includeToken, headers) {
-  let mergedUrl = includeToken ? url + query.token : mergedUrl = url
+  let mergedUrl = includeToken ? url + query.token : url
   let options = {}
 
   options.headers = (!headers || Object.keys(headers).length <= 0) ?
     {} : options.headers = headers
 
   return axios.get(mergedUrl, options).then(res => {
-    if ((query.platform === 'facebook' && res.data.id === query.id)
-      || (query.platform === 'google' && res.email === query.id)
-      || (query.platform === 'kakaotalk' && res.id === query.id)) {
+    if ((query.platform === 'facebook' && res.data.id == query.id)
+      || (query.platform === 'google' && res.email == query.id)
+      || (query.platform === 'kakaotalk' && res.data.id == query.id)) {
       return next()
     }
+    throw 'You didn\'t have authentication.'
   }).catch(err => {
     let errDetail = new Error('You didn\'t have authentication.')
     errDetail.status = 401
