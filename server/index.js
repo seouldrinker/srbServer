@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 
+import database from './database'
+
 import index from './routes/index'
 import explore from './routes/explore'
 import feeds from './routes/feeds'
@@ -20,6 +22,7 @@ app.use(cookieParser())
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+database()
 
 app.use('/srb/vbeta/explore', explore)
 app.use('/srb/vbeta/feeds', feeds)
