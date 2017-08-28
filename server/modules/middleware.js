@@ -41,7 +41,7 @@ function _commonAuth(next, url, query, includeToken, headers) {
 
   return axios.get(mergedUrl, options).then(res => {
     if ((query.platform === 'facebook' && res.data.id == query.id)
-      || (query.platform === 'google' && res.email == query.id)
+      || (query.platform === 'google' && res.data.email == query.id)
       || (query.platform === 'kakaotalk' && res.data.id == query.id)) {
       return next()
     }
