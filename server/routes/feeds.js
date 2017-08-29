@@ -1,6 +1,6 @@
 import express from 'express'
 import axios from 'axios'
-import { authentication } from '../modules/middleware'
+import { authentication } from '../middleware/authentication'
 
 const router = express.Router()
 

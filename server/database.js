@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { DB_URL } from './config'
 
 const db = mongoose.connection
 
@@ -10,5 +11,5 @@ export default function database () {
 }
 
 function _connect() {
-  mongoose.connect('mongodb://127.0.0.1:27017', { useMongoClient: true })
+  mongoose.connect(DB_URL, { useMongoClient: true })
 }

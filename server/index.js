@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 
-import database from './database'
+// import database from './database'
 
 import index from './routes/index'
 import explore from './routes/explore'
@@ -22,7 +22,7 @@ app.use(cookieParser())
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-database()
+// database()
 
 app.use('/srb/vbeta/explore', explore)
 app.use('/srb/vbeta/feeds', feeds)
@@ -36,7 +36,6 @@ app.use((err, req, res, next) => {
     message: err.message || 'Server error'
   })
 })
-
 
 const server = app.listen(port, () => {
   console.log('Express listening on port', port)
