@@ -53,12 +53,12 @@ async function _collectWalkAllCourse(next) {
   return results
 }
 
-async function _queryOneWalkCourse(id, next) {
-  return await _getWalkCourse(`http://openapi.seoul.go.kr:8088/${API_KEY}/json/SeoulGilWalkCourse/1/1000/${id}`, next)
+function _queryOneWalkCourse(id, next) {
+  return _getWalkCourse(`http://openapi.seoul.go.kr:8088/${API_KEY}/json/SeoulGilWalkCourse/1/1000/${id}`, next)
 }
 
-async function _queryAllWalkCourse(startCount, endCount, next) {
-  return await _getWalkCourse(`http://openapi.seoul.go.kr:8088/${API_KEY}/json/SeoulGilWalkCourse/${startCount}/${endCount}`, next)
+function _queryAllWalkCourse(startCount, endCount, next) {
+  return _getWalkCourse(`http://openapi.seoul.go.kr:8088/${API_KEY}/json/SeoulGilWalkCourse/${startCount}/${endCount}`, next)
 }
 
 async function _getWalkCourse(url, next) {
