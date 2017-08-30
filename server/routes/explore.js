@@ -1,32 +1,34 @@
 import express from 'express'
 import axios from 'axios'
 import { authentication } from '../middleware/authentication'
-import { getFilteredWalkCourse } from '../middleware/explore'
+import { getFilteredAllWalkCourse, getOneWalkCourse } from '../middleware/explore'
 
 const router = express.Router()
 
 // router.use(authentication)
 
-router.get('/', (req, res, next) => {
-  let startPage = 1
-  let endPage = 1000
-  if (req.query.page && req.query.page > 1) {
-    endPage = endPage * req.query.page
-    startPage = endPage - 1000 + 1
+router.get('/', async (req, res, next) => {
+  const results = await getFilteredAllWalkCourse(req.session, next)
+  if (typeof results !== 'undefined') {
+    res.send({
+      code: 200,
+      results
+    })
+  } else {
+    return next('route')
   }
-
-  return getFilteredWalkCourse(startPage, endPage, next).then(results => {
-    if (typeof results !== 'undefined') {
-      res.send({
-        code: 200,
-        results
-      })
-    }
-  })
 })
 
-router.get('/:id', (req, res) => {
-  res.send(`get - /explore/${req.params.id}`)
+router.get('/:id', async (req, res, next) => {
+  const results = await getOneWalkCourse(encodeURIComponent(req.params.id), next)
+  if (typeof results !== 'undefined') {
+    res.send({
+      code: 200,
+      results
+    })
+  } else {
+    return next('route')
+  }
 })
 
 export default router

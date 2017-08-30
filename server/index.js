@@ -1,4 +1,5 @@
 import express from 'express'
+import session from 'express-session'
 import morgan from 'morgan'
 import fs from 'fs'
 import path from 'path'
@@ -13,11 +14,18 @@ import explore from './routes/explore'
 import feeds from './routes/feeds'
 import info from './routes/info'
 
+import { SESSION_SECRET } from './config'
+
 const app = express()
 const port = 3000
 
 // config - logs, cookie, cors, route, exception
 app.use(morgan('combined', {stream: fs.createWriteStream(path.join(__dirname + '/../logs', 'access.log'), {flags: 'a'})}))
+app.use(session({
+  secret: SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true
+}));
 app.use(cookieParser())
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -30,8 +38,7 @@ app.use('/srb/vbeta/info', info)
 app.use('/', index)
 
 app.use((err, req, res, next) => {
-  res.status(err.status || 500)
-  res.send({
+  res.status(err.status || 500).send({
     code: err.status || 500,
     message: err.message || 'Server error'
   })
