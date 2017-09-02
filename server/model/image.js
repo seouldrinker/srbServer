@@ -1,7 +1,9 @@
 import mongoose from 'mongoose'
 
-export default new mongoose.Schema({
-  feed: { type: Number, ref: 'Feed' },
+const Schema = mongoose.Schema
+
+export default mongoose.model('Image', new Schema({
+  feed: { type: Schema.Types.ObjectId, ref: 'Feed' },
   image_url: String,
   is_map: Number,
   is_ok: Number,
@@ -13,4 +15,4 @@ export default new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-})
+}, { autoIndex: true }))

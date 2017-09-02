@@ -1,6 +1,8 @@
 import mongoose from 'mongoose'
 
-export default new mongoose.Schema({
+const Schema = mongoose.Schema
+
+export default mongoose.model('User', new Schema({
   id: String,
   platform: String,
   is_ok: Number,
@@ -12,4 +14,4 @@ export default new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-})
+}, { autoIndex: true }))

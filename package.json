@@ -7,7 +7,8 @@
     "test": "mocha --compilers js:babel-core/register",
     "clean": "rm -rf build/**",
     "build": "babel server --out-dir build",
-    "start": "npm run build && node ./build/index.js"
+    "start": "npm run build && node ./build/index.js",
+    "debug": "npm run build && DEBUG=express:* node ./build/index.js"
   },
   "author": "jicjjang <jicjjang12@gmail.com>",
   "license": "MIT",
@@ -19,7 +20,6 @@
     "express": "^4.15.4",
     "express-session": "^1.15.5",
     "mongoose": "^4.11.9",
-    "mongoose-auto-increment": "^5.0.1",
     "morgan": "^1.8.2"
   },
   "devDependencies": {
