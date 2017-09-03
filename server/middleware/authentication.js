@@ -65,12 +65,12 @@ export function checkRegister (req, res, next) {
   let errDetail = new Error('Database failure.')
   errDetail.status = 500
 
-  User.find({'id': req.query.id}).then((user, err) => {
+  User.findOne({'id': req.query.id, 'platform': req.query.platform}).then((user, err) => {
     if (err) {
-      throw err
+      return next(errDetail)
     }
 
-    if (!user || user.length < 1) {
+    if (!user) {
       let newUser = new User()
       newUser.id = req.query.id
       newUser.platform = req.query.platform

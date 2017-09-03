@@ -1,13 +1,22 @@
 import express from 'express'
 import axios from 'axios'
-// import {  } from '../modules/feed'
+import { imageUpload, saveFeed } from '../modules/feed'
 
+const app = express()
 const router = express.Router()
 
 router.route('/').get((req, res) => {
   res.send(`get - /feed${req.query.page ? `?page=${req.query.page}` : ''}`)
-}).post((req, res) => {
-
+}).post(imageUpload, async (req, res, next) => {
+  const results = await saveFeed(req, res, next)
+  if (typeof results !== 'undefined') {
+    res.send({
+      code: 200,
+      results: results
+    })
+  } else {
+    return next('route')
+  }
 })
 
 router.route('/:id').put((req, res) => {                        // 수정
