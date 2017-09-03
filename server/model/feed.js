@@ -18,4 +18,4 @@ export default mongoose.model('Feed', new Schema({
     type: Date,
     default: Date.now
   }
-}, { autoIndex: true }))
+}, { autoIndex: true, versionKey: false }))

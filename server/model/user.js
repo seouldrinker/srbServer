@@ -14,4 +14,4 @@ export default mongoose.model('User', new Schema({
     type: Date,
     default: Date.now
   }
-}, { autoIndex: true }))
+}, { autoIndex: true, versionKey: false }))
