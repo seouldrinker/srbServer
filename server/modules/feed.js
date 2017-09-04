@@ -56,7 +56,6 @@ export async function saveFeed (req, res, next) {
     newFeed.is_ok = 1
     newFeed.crt_dt = new Date()
     newFeed.udt_dt = newFeed.crt_dt
-    console.log(req.body)
     const feed = await newFeed.save(async (err, feed) => {
       if (err) {
         return next(errDetail)

@@ -1,8 +1,14 @@
 import express from 'express'
-import axios from 'axios'
+import bodyParser from 'body-parser'
+
 import { getAllWalkCourse, getOneWalkCourse } from '../modules/explore'
 
 const router = express.Router()
+
+router.use(bodyParser.json())
+router.use(bodyParser.urlencoded({
+  extended: true
+}))
 
 router.get('/', async (req, res, next) => {
   const results = await getAllWalkCourse(req.session, next)

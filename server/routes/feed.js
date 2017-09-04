@@ -1,13 +1,12 @@
 import express from 'express'
 import bodyParser from 'body-parser'
-import axios from 'axios'
+
 import { imageUpload, saveFeed } from '../modules/feed'
 
-const app = express()
 const router = express.Router()
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({
+router.use(bodyParser.json())
+router.use(bodyParser.urlencoded({
   extended: true
 }))
 
