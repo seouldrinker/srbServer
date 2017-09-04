@@ -19,7 +19,8 @@ export async function getFilteredAllWalkCourseCount(session, next) {
 
 export async function getAllWalkCourse(session, next) {
   if (!session.getAllWalkCourse) {
-    session.getAllWalkCourse = await _collectWalkAllCourse(next)
+    session.getAllWalkCourse
+    = _makeCollectedWalkCourse(await _collectWalkAllCourse(next))
   }
   return session.getAllWalkCourse
 }
@@ -31,9 +32,33 @@ export async function getAllWalkCourseCount(session, next) {
   return session.getAllWalkCourseCount
 }
 
-export async function getOneWalkCourse(id, next) {
+export async function getFilteredOneWalkCourse(id, next) {
   const roads = await _queryOneWalkCourse(id, next)
   return roads.data.SeoulGilWalkCourse.row[0]
+}
+
+export async function getOneWalkCourse(id, next) {
+  const roads = await _queryOneWalkCourse(id, next)
+  return roads.data.SeoulGilWalkCourse.row
+}
+
+async function _makeCollectedWalkCourse(walkAllCourse) {
+  let tempWalkAllCourse = {}
+  let newWalkAllCourse = []
+  for (var i=0; i<walkAllCourse.length; i++ ) {
+    if (!tempWalkAllCourse[walkAllCourse[i].COURSE_NAME]) {
+      tempWalkAllCourse[walkAllCourse[i].COURSE_NAME] = []
+    }
+    tempWalkAllCourse[walkAllCourse[i].COURSE_NAME].push(walkAllCourse[i])
+  }
+
+  for (const name in tempWalkAllCourse) {
+    newWalkAllCourse.push({
+      name,
+      contents: tempWalkAllCourse[name]
+    })
+  }
+  return newWalkAllCourse
 }
 
 async function _collectWalkAllCourse(next) {

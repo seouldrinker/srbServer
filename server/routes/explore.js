@@ -1,11 +1,11 @@
 import express from 'express'
 import axios from 'axios'
-import { getFilteredAllWalkCourse, getOneWalkCourse } from '../modules/explore'
+import { getAllWalkCourse, getOneWalkCourse } from '../modules/explore'
 
 const router = express.Router()
 
 router.get('/', async (req, res, next) => {
-  const results = await getFilteredAllWalkCourse(req.session, next)
+  const results = await getAllWalkCourse(req.session, next)
   if (typeof results !== 'undefined') {
     res.send({
       code: 200,
