@@ -47,15 +47,16 @@ export async function saveFeed (req, res, next) {
 
   return await User.findOne({'id': req.query.id, 'platform': req.query.platform}).then(async (user, err) => {
     let newFeed = new Feed()
-    newFeed.road_id = req.query.road_id
-    newFeed.contents = req.query.contents
-    newFeed.walk_langth = req.query.walk_langth
-    newFeed.walk_time = req.query.walk_time
-    newFeed.walk_count = req.query.walk_count
+    newFeed.road_id = req.body.road_id || 0
+    newFeed.contents = req.body.contents
+    newFeed.walk_langth = req.body.walk_langth || 0
+    newFeed.walk_time = req.body.walk_time || 0
+    newFeed.walk_count = req.body.walk_count || 0
     newFeed.images = _saveImages(req, res, next)
     newFeed.is_ok = 1
     newFeed.crt_dt = new Date()
     newFeed.udt_dt = newFeed.crt_dt
+    console.log(req.body)
     const feed = await newFeed.save(async (err, feed) => {
       if (err) {
         return next(errDetail)

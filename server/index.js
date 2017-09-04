@@ -4,7 +4,6 @@ import morgan from 'morgan'
 import fs from 'fs'
 import path from 'path'
 import cookieParser from 'cookie-parser'
-import bodyParser from 'body-parser'
 import cors from 'cors'
 import mongoose from 'mongoose'
 
@@ -34,8 +33,6 @@ app.use(session({
 }));
 app.use(cookieParser())
 app.use(cors())
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json())
 
 // [route]
 app.use('/', index)
