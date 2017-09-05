@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import User from '../model/user'
+import User from '../models/user'
 
 /**
   TODO: 계정 인증 여부를 체크
