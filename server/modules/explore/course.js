@@ -1,50 +1,21 @@
 import axios from 'axios'
-import { API_KEY } from '../config'
+import { API_KEY } from '../../config'
 
-export async function getFilteredAllWalkCourse(session, next) {
-  if (!session.getFilteredAllWalkCourse) {
-    session.getFilteredAllWalkCourse
-      = _filterWalkCourse(await _collectWalkAllCourse(next))
-  }
-  return session.getFilteredAllWalkCourse
-}
-
-export async function getFilteredAllWalkCourseCount(session, next) {
-  if (!session.getFilteredAllWalkCourseCount) {
-    session.getFilteredAllWalkCourseCount
-      = _filterWalkCourse(await _collectWalkAllCourse(next)).length
-  }
-  return session.getFilteredAllWalkCourseCount
-}
-
+/**
+  NOTE: 전체 경로 조회 (한꺼번에)
+**/
 export async function getAllWalkCourse(session, next) {
   if (!session.getAllWalkCourse) {
-    session.getAllWalkCourse
-    = _makeCollectedWalkCourse(await _collectWalkAllCourse(next))
+    session.getAllWalkCourse = await _makeCollectedWalkCourse(next)
   }
   return session.getAllWalkCourse
 }
 
-export async function getAllWalkCourseCount(session, next) {
-  if (!session.getAllWalkCourseCount) {
-    session.getAllWalkCourseCount = await _collectWalkAllCourse(next).length
-  }
-  return session.getAllWalkCourseCount
-}
-
-export async function getFilteredOneWalkCourse(id, next) {
-  const roads = await _queryOneWalkCourse(id, next)
-  return roads.data.SeoulGilWalkCourse.row[0]
-}
-
-export async function getOneWalkCourse(id, next) {
-  const roads = await _queryOneWalkCourse(id, next)
-  return roads.data.SeoulGilWalkCourse.row
-}
-
-async function _makeCollectedWalkCourse(walkAllCourse) {
+async function _makeCollectedWalkCourse(next) {
   let tempWalkAllCourse = {}
   let newWalkAllCourse = []
+  const walkAllCourse = await _collectWalkAllCourse(next)
+
   for (var i=0; i<walkAllCourse.length; i++ ) {
     if (!tempWalkAllCourse[walkAllCourse[i].COURSE_NAME]) {
       tempWalkAllCourse[walkAllCourse[i].COURSE_NAME] = []
@@ -78,14 +49,27 @@ async function _collectWalkAllCourse(next) {
   return results
 }
 
-function _queryOneWalkCourse(id, next) {
-  return _getWalkCourse(`http://openapi.seoul.go.kr:8088/${API_KEY}/json/SeoulGilWalkCourse/1/1000/${id}`, next)
-}
-
 function _queryAllWalkCourse(startCount, endCount, next) {
   return _getWalkCourse(`http://openapi.seoul.go.kr:8088/${API_KEY}/json/SeoulGilWalkCourse/${startCount}/${endCount}`, next)
 }
 
+
+/**
+  NOTE: 특정 경로 조회
+**/
+export async function getOneWalkCourse(id, next) {
+  const roads = await _queryOneWalkCourse(id, next)
+  return roads.data.SeoulGilWalkCourse.row
+}
+
+function _queryOneWalkCourse(id, next) {
+  return _getWalkCourse(`http://openapi.seoul.go.kr:8088/${API_KEY}/json/SeoulGilWalkCourse/1/1000/${id}`, next)
+}
+
+
+/**
+  NOTE: 공통으로 코스에 대한 데이터를 가져옴
+**/
 async function _getWalkCourse(url, next) {
   const results = await axios.get(url)
   const course = results.data.SeoulGilWalkCourse
@@ -105,22 +89,4 @@ async function _getWalkCourse(url, next) {
     errDetail.status = 500
   }
   return next(errDetail)
-}
-
-function _filterWalkCourse(course) {
-  let courseNameArr = []
-  let flagSaveArea = {}
-
-  // Put a flag on the save area use the same names
-  for (let i=0; i<course.length; i++) {
-    if (!flagSaveArea[course[i].COURSE_NAME]
-      || flagSaveArea[course[i].COURSE_NAME] === undefined) {
-      flagSaveArea[course[i].COURSE_NAME] = course[i]
-    }
-  }
-  // Removed same name values
-  for (var i in flagSaveArea) {
-    courseNameArr[courseNameArr.length] = flagSaveArea[i]
-  }
-  return courseNameArr
 }

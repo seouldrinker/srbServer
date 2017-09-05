@@ -1,7 +1,8 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 
-import { getAllWalkCourse, getOneWalkCourse } from '../modules/explore'
+import { getAllWalkCourse, getOneWalkCourse } from '../modules/explore/course'
+import { getImagesOfWalkCourse } from '../modules/explore/image'
 
 const router = express.Router()
 
@@ -23,19 +24,22 @@ router.get('/', async (req, res, next) => {
 })
 
 router.get('/:id', async (req, res, next) => {
-  const results = await getOneWalkCourse(encodeURIComponent(req.params.id), next)
+  const courseList = await getOneWalkCourse(encodeURIComponent(req.params.id), next)
+  const imageList = await getImagesOfWalkCourse(req.body, next)
 
-  // 유저들이 올린 사진 필요 (CPI_IDX 값을 기준으로.)
-
-  if (typeof results !== 'undefined') {
+  if (typeof courseList !== 'undefined' && typeof imageList !== 'undefined') {
     res.send({
       code: 200,
-      results
+      results: {
+        courseList,
+        imageList
+      }
     })
   } else {
     return next('route')
   }
 })
+
 
 export default router
 

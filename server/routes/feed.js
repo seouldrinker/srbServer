@@ -1,7 +1,8 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 
-import { imageUpload, saveFeed } from '../modules/feed'
+import { insertFeed, updateFeed, deleteFeed, getAllFeedList, getPageFeedList } from '../modules/feed'
+import { imageUpload } from '../middleware/image'
 
 const router = express.Router()
 
@@ -10,10 +11,23 @@ router.use(bodyParser.urlencoded({
   extended: true
 }))
 
-router.route('/').get((req, res) => {
-  res.send(`get - /feed${req.query.page ? `?page=${req.query.page}` : ''}`)
+router.route('/').get(async (req, res, next) => {
+  let results = null
+  if (req.query.page) {
+    results = await getPageFeedList(req, next)
+  } else {
+    results = await getAllFeedList(next)
+  }
+  if (typeof results !== 'undefined') {
+    res.send({
+      code: 200,
+      results: results
+    })
+  } else {
+    return next('route')
+  }
 }).post(imageUpload, async (req, res, next) => {
-  const results = await saveFeed(req, res, next)
+  const results = await insertFeed(req, res, next)
   if (typeof results !== 'undefined') {
     res.send({
       code: 200,
@@ -24,23 +38,13 @@ router.route('/').get((req, res) => {
   }
 })
 
-router.route('/:id').put((req, res) => {                        // 수정
+router.route('/:id').put(imageUpload, (req, res, next) => {
   res.send(`put - /feed/${req.params.id}`)
-}).delete((req, res) => {                     // 삭제
+}).delete((req, res, next) => {
   res.send(`delete - /feed/${req.params.id}`)
-})
-
-router.get('/explore/:explore_id', (req, res) => {
-  res.send(`get - /feed/explore/${req.params.explore_id}${req.query.page ? `?page=${req.query.page}` : ''}`)
-})
-
-router.get('/user/:user_id', (req, res) => {
-  res.send(`get - /feed/user/${req.params.user_id}${req.query.page ? `?page=${req.query.page}` : ''}`)
 })
 
 export default router
 
 // clear      : /srb/vbeta/feed?page=2                         // 전체 피드 히스토리 조회, 피드 생성
-// clear      : /srb/vbeta/feed/:id                            // 특정 피드 수정, 삭제 (특정 게시글 조회는 불가)
-//            : /srb/vbeta/feed/explore/:explore_id?page=2     // 특정 둘레길의 피드 히스토리 조회
-//            : /srb/vbeta/feed/user/:user_id?page=2           // 특정 사용자의 피드 히스토리 조회
+//            : /srb/vbeta/feed/:id                            // 특정 피드 수정, 삭제 (특정 게시글 조회는 불가)

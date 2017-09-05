@@ -1,51 +1,49 @@
-import multer from 'multer'
+import Image from '../models/image'
+import Feed from '../models/feed'
+import User from '../models/user'
 
-import Image from '../model/image'
-import Feed from '../model/feed'
-import User from '../model/user'
-
-export function imageUpload (req, res, next) {
-  let mapCounter = 0
-  let imageCounter = 0
-
-  const upload = multer({
-    storage: multer.diskStorage({
-      destination: function (req, file, cb) {
-        cb(null, 'feeds/')
-      },
-      filename: function (req, file, cb) {
-        const currentDate = new Date()
-        cb(null, file.fieldname
-          + (file.fieldname === 'map' ? mapCounter++ : imageCounter++) + '_'
-          + currentDate.getFullYear()
-          + (currentDate.getMonth() < 10 ? '0' : '') + currentDate.getMonth()
-          + (currentDate.getDate() < 10 ? '0' : '') + currentDate.getDate()
-          + (currentDate.getHours() < 10 ? '0' : '') + currentDate.getHours()
-          + (currentDate.getMinutes() < 10 ? '0' : '') + currentDate.getMinutes()
-          + (currentDate.getSeconds() < 10 ? '0' : '') + currentDate.getSeconds()
-          + '.' + file.mimetype.split('/')[1])
-      }
-    })
-  }).fields([
-    { name: 'map', maxCount: 1 },
-    { name: 'photo', maxCount: 100 }
-  ])
-
-  upload(req, res, function (err) {
-    if (!err) {
-      return next()
+/**
+  NOTE: 전체 경로 조회 (한꺼번에)
+**/
+export function getAllFeedList (next) {
+  return Feed.find({is_ok: 1}).sort({crt_dt: -1}).then((feeds, err) => {
+    if (err) {
+      let errDetail = new Error('Database failure.')
+      errDetail.status = 500
+      return next(errDetail)
     }
-    let errDetail = new Error('Image save failure.')
-    errDetail.status = 500
-    return next(errDetail)
+    return feeds
   })
 }
 
-export async function saveFeed (req, res, next) {
+
+/**
+  NOTE: 전체 경로 조회 (페이지 단위)
+**/
+export function getPageFeedList (req, next) {
+  const page = (!req.query.page || req.query.page <= 0) ? 1 : req.query.page
+  const count = !req.query.count ? 20 : req.query.count
+
+  return Feed.find({is_ok: 1}).sort({crt_dt: -1})
+    .limit(count).skip((page-1) * count).then((feeds, err) => {
+    if (err) {
+      let errDetail = new Error('Database failure.')
+      errDetail.status = 500
+      return next(errDetail)
+    }
+    return feeds
+  })
+}
+
+
+/**
+  NOTE: 피드 저장 (저장 전에 이미지들 부터 저장 후 진행)
+**/
+export function insertFeed (req, res, next) {
   let errDetail = new Error('Database failure.')
   errDetail.status = 500
 
-  return await User.findOne({'id': req.query.id, 'platform': req.query.platform}).then(async (user, err) => {
+  return User.findOne({'id': req.query.id, 'platform': req.query.platform}).then(async (user, err) => {
     let newFeed = new Feed()
     newFeed.road_id = req.body.road_id || 0
     newFeed.contents = req.body.contents
@@ -56,7 +54,7 @@ export async function saveFeed (req, res, next) {
     newFeed.is_ok = 1
     newFeed.crt_dt = new Date()
     newFeed.udt_dt = newFeed.crt_dt
-    const feed = await newFeed.save(async (err, feed) => {
+    const feed = await newFeed.save((err, feed) => {
       if (err) {
         return next(errDetail)
       }
@@ -64,7 +62,7 @@ export async function saveFeed (req, res, next) {
     })
 
     user.feeds.push(newFeed)
-    return await user.save((err, user) => {
+    return user.save((err, user) => {
       if (err) {
         return next(errDetail)
       }
@@ -78,12 +76,9 @@ function _saveImages (req, res, next) {
 
   return allFiles.map((v, k) => {
     let newImage = new Image()
+    newImage.road_id = req.body.road_id || 0
     newImage.image_url = req.headers.host + '/static/' + v.filename
-    if (v.fieldname === 'map') {
-      newImage.is_map = 1
-    } else {
-      newImage.is_map = 0
-    }
+    newImage.is_map = (v.fieldname === 'map') ? 1 : 0
     newImage.is_ok = 1
     newImage.crt_dt = new Date()
     newImage.udt_dt = newImage.crt_dt
@@ -94,4 +89,22 @@ function _saveImages (req, res, next) {
     })
     return newImage
   })
+}
+
+
+/**
+  TODO: 구현
+  NOTE: 피드 수정 (저장 전에 기존 이미지들 및 레퍼런스 삭제)
+**/
+export function updateFeed () {
+
+}
+
+
+/**
+  TODO: 구현
+  NOTE: 피드 삭제 (삭제 전에 기존 이미지들 및 레퍼런스 삭제)
+**/
+export function deleteFeed () {
+
 }
