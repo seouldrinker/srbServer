@@ -13,31 +13,33 @@ router.use(bodyParser.urlencoded({
 
 router.get('/', async (req, res, next) => {
   const results = await getAllWalkCourse(req.session, next)
-  if (typeof results !== 'undefined') {
-    res.send({
+  if (results && typeof results !== 'undefined') {
+    return res.send({
       code: 200,
       results
     })
-  } else {
-    return next('route')
   }
+  let errDetail = new Error('Database failure.')
+  errDetail.status = 500
+  return next(errDetail)
 })
 
 router.get('/:id', async (req, res, next) => {
   const courseList = await getOneWalkCourse(encodeURIComponent(req.params.id), next)
   const imageList = await getImagesOfWalkCourse(req.body, next)
 
-  if (typeof courseList !== 'undefined' && typeof imageList !== 'undefined') {
-    res.send({
+  if (courseList && imageList && typeof courseList !== 'undefined' && typeof imageList !== 'undefined') {
+    return res.send({
       code: 200,
       results: {
         courseList,
         imageList
       }
     })
-  } else {
-    return next('route')
   }
+  let errDetail = new Error('Database failure.')
+  errDetail.status = 500
+  return next(errDetail)
 })
 
 

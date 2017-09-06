@@ -18,30 +18,41 @@ router.route('/').get(async (req, res, next) => {
   } else {
     results = await getAllFeedList(next)
   }
-  if (typeof results !== 'undefined') {
-    res.send({
+  if (results && typeof results !== 'undefined') {
+    return res.send({
       code: 200,
       results: results
     })
-  } else {
-    return next('route')
   }
+  let errDetail = new Error('Database failure.')
+  errDetail.status = 500
+  return next(errDetail)
 }).post(imageUpload, async (req, res, next) => {
-  const results = await insertFeed(req, res, next)
-  if (typeof results !== 'undefined') {
-    res.send({
+  const results = await insertFeed(req, next)
+  if (results && typeof results !== 'undefined') {
+    return res.send({
       code: 200,
       results: results
     })
-  } else {
-    return next('route')
   }
+  let errDetail = new Error('Database failure.')
+  errDetail.status = 500
+  return next(errDetail)
 })
 
 router.route('/:id').put(imageUpload, (req, res, next) => {
   res.send(`put - /feed/${req.params.id}`)
-}).delete((req, res, next) => {
-  res.send(`delete - /feed/${req.params.id}`)
+}).delete(async (req, res, next) => {
+  const feed = await deleteFeed(req.params.id, next)
+  if (feed && typeof feed !== 'undefined') {
+    return res.send({
+      code: 200,
+      results: feed
+    })
+  }
+  let errDetail = new Error('Have no return value')
+  errDetail.status = 406
+  return next(errDetail)
 })
 
 export default router
