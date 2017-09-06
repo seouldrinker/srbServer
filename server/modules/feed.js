@@ -1,12 +1,13 @@
 import Image from '../models/image'
 import Feed from '../models/feed'
 import User from '../models/user'
+import Reward from '../models/reward'
 
 /**
   NOTE: 전체 경로 조회 (한꺼번에)
 **/
 export function getAllFeedList (next) {
-  return Feed.find({is_ok: 1}).sort({crt_dt: -1}).then((feeds, err) => {
+  return Feed.find({is_ok: 1}).sort({crt_dt: -1}).populate('images').then((feeds, err) => {
     if (err) {
       let errDetail = new Error('Database failure.')
       errDetail.status = 500
@@ -25,7 +26,7 @@ export function getPageFeedList (req, next) {
   const count = !req.query.count ? 20 : req.query.count
 
   return Feed.find({is_ok: 1}).sort({crt_dt: -1})
-    .limit(count).skip((page-1) * count).then((feeds, err) => {
+    .limit(count).skip((page-1) * count).populate('images').then((feeds, err) => {
     if (err) {
       let errDetail = new Error('Database failure.')
       errDetail.status = 500
@@ -39,22 +40,29 @@ export function getPageFeedList (req, next) {
 /**
   NOTE: 피드 저장 (저장 전에 이미지들 부터 저장 후 진행)
 **/
-export function insertFeed (req, res, next) {
+export function insertFeed (req, next) {
   let errDetail = new Error('Database failure.')
   errDetail.status = 500
 
-  return User.findOne({'id': req.query.id, 'platform': req.query.platform}).then(async (user, err) => {
+  return User.findOne({id: req.query.id, platform: req.query.platform})
+    .populate('feeds', 'rewards').then(async (user, err) => {
     let newFeed = new Feed()
     newFeed.road_id = req.body.road_id || 0
     newFeed.contents = req.body.contents
     newFeed.walk_langth = req.body.walk_langth || 0
     newFeed.walk_time = req.body.walk_time || 0
     newFeed.walk_count = req.body.walk_count || 0
-    newFeed.images = _saveImages(req, res, next)
+    newFeed.images = _saveImages(req, next)
     newFeed.is_ok = 1
     newFeed.crt_dt = new Date()
     newFeed.udt_dt = newFeed.crt_dt
-    const feed = await newFeed.save((err, feed) => {
+    const savedFeed = await newFeed.save((err, savedFeed) => {
+      if (err) {
+        return next(errDetail)
+      }
+      return savedFeed
+    })
+    Feed.populate(savedFeed, {path: 'images'}, (err, feed) => {
       if (err) {
         return next(errDetail)
       }
@@ -62,7 +70,15 @@ export function insertFeed (req, res, next) {
     })
 
     user.feeds.push(newFeed)
-    return user.save((err, user) => {
+    const savedUser = await user.save((err, savedUser) => {
+      if (err) {
+        return next(errDetail)
+      }
+      return savedUser
+    })
+    return User.populate(savedUser,
+      [{path: 'feeds', model: 'Feed'}, {path: 'rewards', model: 'Reward'}],
+      (err, user) => {
       if (err) {
         return next(errDetail)
       }
@@ -71,7 +87,7 @@ export function insertFeed (req, res, next) {
   })
 }
 
-function _saveImages (req, res, next) {
+function _saveImages (req, next) {
   const allFiles = req.files.map.concat(req.files.photo)
 
   return allFiles.map((v, k) => {
@@ -84,6 +100,8 @@ function _saveImages (req, res, next) {
     newImage.udt_dt = newImage.crt_dt
     newImage.save((err, image) => {
       if (err) {
+        let errDetail = new Error('Database failure.')
+        errDetail.status = 500
         return next(errDetail)
       }
     })
@@ -105,6 +123,13 @@ export function updateFeed () {
   TODO: 구현
   NOTE: 피드 삭제 (삭제 전에 기존 이미지들 및 레퍼런스 삭제)
 **/
-export function deleteFeed () {
-
+export function deleteFeed (feed_id, next) {
+  return Feed.findByIdAndRemove(feed_id, (feed, err) => {
+    if (err) {
+      let errDetail = new Error('Database failure.')
+      errDetail.status = 500
+      return next(errDetail)
+    }
+    return feed
+  })
 }
