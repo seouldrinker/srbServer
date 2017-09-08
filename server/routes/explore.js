@@ -26,7 +26,7 @@ router.get('/', async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   const courseList = await getOneWalkCourse(encodeURIComponent(req.params.id), next)
-  const imageList = await getImagesOfWalkCourse(req.body, next)
+  const imageList = await getImagesOfWalkCourse(encodeURIComponent(req.params.id), req.body, next)
 
   if (courseList && imageList && typeof courseList !== 'undefined' && typeof imageList !== 'undefined') {
     return res.send({
