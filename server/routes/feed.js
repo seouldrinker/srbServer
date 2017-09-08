@@ -40,8 +40,17 @@ router.route('/').get(async (req, res, next) => {
   return next(errDetail)
 })
 
-router.route('/:id').put(imageUpload, (req, res, next) => {
-  res.send(`put - /feed/${req.params.id}`)
+router.route('/:id').put(imageUpload, async (req, res, next) => {
+  const feed = await updateFeed(req, next)
+  if (feed && typeof feed !== 'undefined') {
+    return res.send({
+      code: 200,
+      results: feed
+    })
+  }
+  let errDetail = new Error('Have no return value')
+  errDetail.status = 406
+  return next(errDetail)
 }).delete(async (req, res, next) => {
   const feed = await deleteFeed(req.params.id, next)
   if (feed && typeof feed !== 'undefined') {
@@ -58,4 +67,4 @@ router.route('/:id').put(imageUpload, (req, res, next) => {
 export default router
 
 // clear      : /srb/vbeta/feed?page=2                         // 전체 피드 히스토리 조회, 피드 생성
-//            : /srb/vbeta/feed/:id                            // 특정 피드 수정, 삭제 (특정 게시글 조회는 불가)
+// clear      : /srb/vbeta/feed/:id                            // 특정 피드 수정, 삭제 (특정 게시글 조회는 없음)

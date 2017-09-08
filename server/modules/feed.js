@@ -7,7 +7,8 @@ import Reward from '../models/reward'
   NOTE: 전체 경로 조회 (한꺼번에)
 **/
 export function getAllFeedList (next) {
-  return Feed.find({is_ok: 1}).sort({crt_dt: -1}).populate('images').then((feeds, err) => {
+  return Feed.find({is_ok: 1}).sort({crt_dt: -1})
+    .populate('images').exec((err, feeds) => {
     if (err) {
       let errDetail = new Error('Database failure.')
       errDetail.status = 500
@@ -26,7 +27,8 @@ export function getPageFeedList (req, next) {
   const count = !req.query.count ? 20 : req.query.count
 
   return Feed.find({is_ok: 1}).sort({crt_dt: -1})
-    .limit(count).skip((page-1) * count).populate('images').then((feeds, err) => {
+    .limit(Number(count)).skip((page-1) * count)
+    .populate('images').exec((err, feeds) => {
     if (err) {
       let errDetail = new Error('Database failure.')
       errDetail.status = 500
@@ -45,7 +47,7 @@ export function insertFeed (req, next) {
   errDetail.status = 500
 
   return User.findOne({id: req.query.id, platform: req.query.platform})
-    .populate('feeds', 'rewards').then(async (user, err) => {
+    .populate('feeds', 'rewards').exec(async (err, user) => {
     let newFeed = new Feed()
     newFeed.road_id = req.body.road_id || 0
     newFeed.contents = req.body.contents
@@ -111,20 +113,36 @@ function _saveImages (req, next) {
 
 
 /**
-  TODO: 구현
-  NOTE: 피드 수정 (저장 전에 기존 이미지들 및 레퍼런스 삭제)
+  NOTE: 피드 수정
+  TODO: (저장 전에 기존 이미지들 및 레퍼런스 삭제)
 **/
-export function updateFeed () {
-
+export function updateFeed (req, next) {
+  return Feed.findOneAndUpdate({_id: req.params.id}, {
+    road_id: req.body.road_id || 0,
+    contents: req.body.contents,
+    walk_langth: req.body.walk_langth || 0,
+    walk_time: req.body.walk_time || 0,
+    walk_count: req.body.walk_count || 0,
+    images: _saveImages(req, next),
+    is_ok: 1,
+    udt_dt: new Date()
+  }).populate('images').exec((err, feed) => {
+    if (err) {
+      let errDetail = new Error('Database failure.')
+      errDetail.status = 500
+      return next(errDetail)
+    }
+    return feed
+  })
 }
 
 
 /**
-  TODO: 구현
   NOTE: 피드 삭제 (삭제 전에 기존 이미지들 및 레퍼런스 삭제)
 **/
 export function deleteFeed (feed_id, next) {
-  return Feed.findByIdAndRemove(feed_id, (feed, err) => {
+  return Feed.findOneAndUpdate({_id: feed_id}, {is_ok: 0})
+    .populate('images').exec((err, feed) => {
     if (err) {
       let errDetail = new Error('Database failure.')
       errDetail.status = 500
