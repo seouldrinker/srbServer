@@ -64,6 +64,12 @@ function _commonAuth(next, url, query, includeToken, headers) {
 export function checkRegister (req, res, next) {
   let errDetail = new Error('Database failure.')
   errDetail.status = 500
+  
+  if (!req.query || !req.query.id || !req.query.platform) {
+    let errDetail = new Error('You didn\'t have authentication.')
+    errDetail.status = 401
+    return next(errDetail)
+  }
 
   User.findOne({'id': req.query.id, 'platform': req.query.platform}).then((user, err) => {
     if (err) {
