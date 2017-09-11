@@ -4,3 +4,4 @@ build
 logs/*
 config.js
 feeds/
+npm-debug.log
